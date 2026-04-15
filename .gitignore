@@ -1,0 +1,40 @@
+# Environment
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+env/
+venv/
+.conda/
+
+# Logs
+logs/
+
+# ChromaDB (auto-generated, can be rebuilt)
+artifacts/vectorstore/
+
+# User uploads (not part of codebase)
+uploads/
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# pytest
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
