@@ -18,15 +18,7 @@ DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 def get_logger(name: str) -> logging.Logger:
-    """
-    Returns a named logger with both console and rotating file handlers.
-
-    Usage
-    -----
-    from src.logger import get_logger
-    logger = get_logger(__name__)
-    logger.info("Ingestion started")
-    """
+    
     logger = logging.getLogger(name)
 
     if logger.handlers:

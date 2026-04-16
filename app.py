@@ -1,21 +1,3 @@
-"""
-app.py
-──────
-FastAPI application for PaperMind.
-
-Endpoints:
-  POST /ingest/pdf          — Upload and process a PDF
-  POST /ingest/image        — Upload and process an image via Claude Vision
-  POST /query               — Ask a question
-  POST /query/stream        — Streaming question answer
-  POST /query/selection     — Ask about selected text from PDF viewer
-  GET  /documents           — List all ingested documents
-  DELETE /documents/{name}  — Remove a document
-  GET  /health              — Health check
-  GET  /evaluate            — Run RAGAS evaluation
-  GET  /docs                — Auto Swagger UI (built into FastAPI)
-"""
-
 import os
 import shutil
 from pathlib import Path
@@ -69,13 +51,11 @@ class SelectionQueryRequest(BaseModel):
 
 @app.get("/")
 async def root(request: Request):
-    """Serve the main UI."""
     return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/health")
 async def health():
-    """Health check endpoint."""
     stats = index_pipeline.get_stats()
     return {
         "status":          "healthy",
@@ -86,7 +66,6 @@ async def health():
 
 @app.post("/ingest/pdf")
 async def ingest_pdf(file: UploadFile = File(...)):
-    """Upload and ingest a PDF document."""
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are accepted")
 
@@ -105,7 +84,6 @@ async def ingest_pdf(file: UploadFile = File(...)):
 
 @app.post("/ingest/image")
 async def ingest_image(file: UploadFile = File(...)):
-    """Upload and ingest an image/screenshot via Claude Vision."""
     allowed = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
     suffix  = Path(file.filename).suffix.lower()
 
@@ -130,7 +108,6 @@ async def ingest_image(file: UploadFile = File(...)):
 
 @app.post("/query")
 async def query(request: QueryRequest):
-    """Ask a question across all ingested documents."""
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty")
 
@@ -143,7 +120,6 @@ async def query(request: QueryRequest):
 
 @app.post("/query/stream")
 async def query_stream(request: QueryRequest):
-    """Streaming version of /query — answer streams token by token."""
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty")
 
@@ -159,7 +135,6 @@ async def query_stream(request: QueryRequest):
 
 @app.post("/query/selection")
 async def query_selection(request: SelectionQueryRequest):
-    """Ask a question about a specific text selection from the PDF viewer."""
     if not request.selected_text.strip():
         raise HTTPException(status_code=400, detail="Selected text cannot be empty")
     if not request.question.strip():
@@ -176,14 +151,12 @@ async def query_selection(request: SelectionQueryRequest):
 
 @app.get("/documents")
 async def list_documents():
-    """List all ingested documents."""
     docs = index_pipeline.list_documents()
     return {"documents": docs, "total": len(docs)}
 
 
 @app.delete("/documents/{source_name}")
 async def delete_document(source_name: str):
-    """Remove a document from the vector store."""
     result = index_pipeline.delete_document(source_name)
     if result["status"] != "success":
         raise HTTPException(status_code=500, detail=result["status"])
@@ -192,14 +165,12 @@ async def delete_document(source_name: str):
 
 @app.post("/memory/clear")
 async def clear_memory():
-    """Clear conversation memory."""
     query_pipeline.clear_memory()
     return {"status": "memory cleared"}
 
 
 @app.get("/evaluate")
 async def evaluate():
-    """Run RAGAS evaluation and return scores."""
     try:
         evaluator = RagasEvaluator()
         scores    = evaluator.evaluate()

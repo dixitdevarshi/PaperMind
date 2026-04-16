@@ -1,10 +1,3 @@
-"""
-retriever_tool.py
-─────────────────
-Factual Q&A tool — default tool for direct questions.
-Wraps QueryPipeline for use as a named tool in the routing system.
-"""
-
 from src.logger import get_logger
 from src.components.retriever import Retriever, RetrievedChunk
 from src.components.answer_generator import AnswerGenerator
@@ -13,16 +6,7 @@ logger = get_logger(__name__)
 
 
 class RetrieverTool:
-    """
-    Factual Q&A tool.
-    Retrieves relevant chunks and generates a grounded answer.
-
-    Usage
-    -----
-    tool   = RetrieverTool(retriever, generator)
-    result = tool.run("What are the data subject rights under GDPR?")
-    """
-
+    
     name        = "retriever"
     description = "Answers factual questions by retrieving relevant document chunks."
 

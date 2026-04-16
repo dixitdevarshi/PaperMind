@@ -1,18 +1,3 @@
-"""
-document_loader.py
-──────────────────
-Handles PDF ingestion for PaperMind.
-
-Responsibilities:
-  1. Load a PDF from a file path using PyMuPDF (fitz)
-  2. Extract text page-by-page, preserving page numbers
-  3. Clean extracted text (strip artefacts, normalise whitespace)
-  4. Detect section headings via heuristics
-  5. Chunk text with RecursiveCharacterTextSplitter (chunk=500, overlap=100)
-  6. Attach metadata: {source, page, section, chunk_index, total_chunks, doc_type}
-  7. Return a list of LangChain Document objects ready for embedding
-"""
-
 import re
 import sys
 import unicodedata
@@ -86,15 +71,6 @@ def _nearest_section(char_start: int, sections: dict[int, str]) -> str:
 # ── Main class ───────────────────────────────────────────────────────────────
 
 class DocumentLoader:
-    """
-    Loads a PDF and returns LangChain Document objects with metadata.
-
-    Usage
-    -----
-    loader = DocumentLoader()
-    docs   = loader.load("path/to/file.pdf")
-    """
-
     def __init__(self, chunk_size: int = CHUNK_SIZE, chunk_overlap: int = CHUNK_OVERLAP):
         self.chunk_size    = chunk_size
         self.chunk_overlap = chunk_overlap

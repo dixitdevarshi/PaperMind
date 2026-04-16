@@ -1,9 +1,3 @@
-"""
-summarizer_tool.py
-──────────────────
-Summarization tool — triggered when user asks for a summary or overview.
-"""
-
 from src.logger import get_logger
 from src.components.retriever import Retriever
 from src.components.answer_generator import AnswerGenerator
@@ -17,15 +11,6 @@ SUMMARIZE_INSTRUCTION = (
 
 
 class SummarizerTool:
-    """
-    Summarization tool.
-    Retrieves the most representative chunks and generates a summary.
-
-    Usage
-    -----
-    tool   = SummarizerTool(retriever, generator)
-    result = tool.run("Summarize the Bosch supplier manual")
-    """
 
     name        = "summarizer"
     description = "Summarizes document content when the user asks for an overview or summary."

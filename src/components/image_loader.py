@@ -1,17 +1,3 @@
-"""
-image_loader.py
-───────────────
-Handles image/screenshot ingestion for PaperMind using Claude Vision.
-
-Responsibilities:
-  1. Accept an image file (PNG, JPG, WEBP, GIF)
-  2. Convert to base64 and send to Claude Vision API
-  3. Claude extracts all text content, preserving structure
-  4. Chunk extracted text with same splitter as document_loader
-  5. Attach metadata: {source, page, section, chunk_index, total_chunks, doc_type}
-  6. Return list of LangChain Document objects ready for embedding
-"""
-
 import base64
 import sys
 from pathlib import Path
@@ -48,15 +34,6 @@ Just return the raw extracted text."""
 # ── Main class ───────────────────────────────────────────────────────────────
 
 class ImageLoader:
-    """
-    Ingests an image/screenshot via Claude Vision and returns
-    LangChain Document objects with metadata.
-
-    Usage
-    -----
-    loader = ImageLoader()
-    docs   = loader.load("path/to/screenshot.png")
-    """
 
     def __init__(self, chunk_size: int = CHUNK_SIZE, chunk_overlap: int = CHUNK_OVERLAP):
         self.client = anthropic.Anthropic()

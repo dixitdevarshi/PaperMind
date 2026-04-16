@@ -1,13 +1,3 @@
-"""
-index_pipeline.py
-─────────────────
-Full ingestion pipeline for PaperMind.
-
-Flow:
-  PDF  → DocumentLoader → chunks → EmbeddingEngine → ChromaDB
-  Image → ImageLoader   → chunks → EmbeddingEngine → ChromaDB
-"""
-
 import sys
 from pathlib import Path
 
@@ -23,15 +13,7 @@ SUPPORTED_IMAGE_FORMATS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
 
 class IndexPipeline:
-    """
-    Orchestrates document ingestion end-to-end.
-
-    Usage
-    -----
-    pipeline = IndexPipeline()
-    result   = pipeline.ingest_pdf("path/to/file.pdf")
-    result   = pipeline.ingest_image("path/to/screenshot.png")
-    """
+    
 
     def __init__(self):
         self.doc_loader   = DocumentLoader()
@@ -42,13 +24,7 @@ class IndexPipeline:
     # ── Public API ───────────────────────────────────────────
 
     def ingest_pdf(self, pdf_path: str) -> dict:
-        """
-        Ingest a single PDF file into the vector store.
-
-        Returns
-        -------
-        dict with keys: source, chunks_added, status
-        """
+        
         pdf_path = Path(pdf_path).resolve()
         logger.info(f"IndexPipeline — ingesting PDF: {pdf_path.name}")
 
@@ -70,13 +46,7 @@ class IndexPipeline:
         }
 
     def ingest_image(self, image_path: str) -> dict:
-        """
-        Ingest a single image/screenshot via Claude Vision.
-
-        Returns
-        -------
-        dict with keys: source, chunks_added, status
-        """
+        
         image_path = Path(image_path).resolve()
         logger.info(f"IndexPipeline — ingesting image: {image_path.name}")
 
@@ -98,21 +68,13 @@ class IndexPipeline:
         }
 
     def ingest_multiple_pdfs(self, pdf_paths: list[str]) -> list[dict]:
-        """Ingest multiple PDFs and return a result dict for each."""
         return [self.ingest_pdf(p) for p in pdf_paths]
 
     def ingest_multiple_images(self, image_paths: list[str]) -> list[dict]:
-        """Ingest multiple images and return a result dict for each."""
         return [self.ingest_image(p) for p in image_paths]
 
     def delete_document(self, source_name: str) -> dict:
-        """
-        Remove all chunks for a document from the vector store.
-
-        Returns
-        -------
-        dict with keys: source, chunks_deleted, status
-        """
+    
         logger.info(f"IndexPipeline — deleting: {source_name}")
         try:
             deleted = self.engine.delete_document(source_name)

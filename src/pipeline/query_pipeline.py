@@ -1,12 +1,3 @@
-"""
-query_pipeline.py
-─────────────────
-Full query pipeline for PaperMind.
-
-Flow:
-  query → Retriever → ToolRouter → AnswerGenerator → response
-"""
-
 import sys
 import re
 from typing import Generator
@@ -27,15 +18,6 @@ EXTRACT_KEYWORDS    = ["extract", "list all", "find all", "enumerate", "aufzähl
 
 
 class QueryPipeline:
-    """
-    Orchestrates retrieval → routing → generation end-to-end.
-
-    Usage
-    -----
-    pipeline = QueryPipeline()
-    result   = pipeline.query("What is GDPR Article 5?")
-    result   = pipeline.query_selection("selected text", "GDPR_EN.pdf", "what does this mean?")
-    """
 
     def __init__(self):
         self.engine    = EmbeddingEngine()
@@ -46,18 +28,7 @@ class QueryPipeline:
     # ── Public API ───────────────────────────────────────────
 
     def query(self, question: str, n_results: int = 5) -> dict:
-        """
-        Full query: retrieve → route → generate → return response.
-
-        Returns
-        -------
-        dict with keys:
-            answer      : str
-            sources     : list[dict]
-            confidence  : str
-            tool_used   : str
-            model_used  : str
-        """
+        
         logger.info(f"QueryPipeline — question: '{question[:80]}'")
 
         # Step 1 — retrieve
@@ -78,11 +49,7 @@ class QueryPipeline:
         question:  str,
         n_results: int = 5,
     ) -> Generator[str, None, None]:
-        """
-        Streaming version of query().
-        Yields answer tokens one by one.
-        Retrieval and routing happen before streaming starts.
-        """
+        
         logger.info(f"QueryPipeline stream — question: '{question[:80]}'")
 
         chunks = self._retrieve(question, n_results)
@@ -98,15 +65,7 @@ class QueryPipeline:
         question:      str,
         n_results:     int = 5,
     ) -> dict:
-        """
-        Answer a question about a specific text selection from the PDF viewer.
-
-        Parameters
-        ----------
-        selected_text : str — text the user highlighted
-        source_name   : str — document filename being viewed
-        question      : str — user's question about the selection
-        """
+        
         logger.info(
             f"Selection query — source: '{source_name}', "
             f"question: '{question[:60]}'"
@@ -142,14 +101,12 @@ class QueryPipeline:
         return response
 
     def clear_memory(self) -> None:
-        """Reset conversation memory."""
         self.generator.clear_memory()
         logger.info("QueryPipeline memory cleared")
 
     # ── Internal ─────────────────────────────────────────────
 
     def _retrieve(self, question: str, n_results: int) -> list[RetrievedChunk]:
-        """Retrieve chunks, handle empty store gracefully."""
         try:
             return self.retriever.retrieve(question, n_results=n_results)
         except RetrievalError as e:
@@ -157,16 +114,7 @@ class QueryPipeline:
             return []
 
     def _route(self, question: str) -> str:
-        """
-        Rule-based tool router.
-        Checks question for keywords to select the right tool.
-
-        Tools:
-          summarizer  — summarization requests
-          comparator  — comparison requests
-          extractor   — structured extraction requests
-          retriever   — default factual Q&A
-        """
+        
         q = question.lower()
 
         if any(kw in q for kw in SUMMARIZE_KEYWORDS):
@@ -183,7 +131,6 @@ class QueryPipeline:
         chunks:   list[RetrievedChunk],
         tool:     str,
     ) -> dict:
-        """Generate answer, adjusting the prompt style based on tool."""
         if tool == "summarizer":
             question = f"Please provide a concise summary based on the context. Original request: {question}"
         elif tool == "comparator":

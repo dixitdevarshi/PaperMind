@@ -1,15 +1,3 @@
-"""
-retriever.py
-────────────
-Semantic retrieval with confidence scoring for PaperMind.
-
-Responsibilities:
-  1. Accept a query string
-  2. Call EmbeddingEngine to get top-n matching chunks
-  3. Assign confidence level based on cosine similarity score
-  4. Return ranked results with confidence label + source attribution
-"""
-
 import sys
 from dataclasses import dataclass
 
@@ -41,32 +29,14 @@ class RetrievedChunk:
 # ── Main class ───────────────────────────────────────────────────────────────
 
 class Retriever:
-    """
-    Wraps EmbeddingEngine with confidence scoring and source formatting.
-
-    Usage
-    -----
-    retriever = Retriever(engine)
-    chunks    = retriever.retrieve("What is the purpose of GDPR?", n_results=5)
-    """
+    
 
     def __init__(self, engine: EmbeddingEngine):
         self.engine = engine
         logger.info("Retriever ready")
 
     def retrieve(self, query: str, n_results: int = 5) -> list[RetrievedChunk]:
-        """
-        Retrieve top-n chunks for a query with confidence scoring.
-
-        Parameters
-        ----------
-        query     : str — user question in any language
-        n_results : int — number of chunks to retrieve
-
-        Returns
-        -------
-        list[RetrievedChunk] sorted by score descending
-        """
+        
         if not query.strip():
             raise RetrievalError("Query cannot be empty", sys)
 
@@ -111,17 +81,7 @@ class Retriever:
         source_name:   str,
         n_results:     int = 5,
     ) -> list[RetrievedChunk]:
-        """
-        Retrieve chunks from a specific document that are semantically
-        close to the user's selected text.
-        Used by the text-selection-to-query feature.
-
-        Parameters
-        ----------
-        selected_text : str — text the user highlighted in the PDF viewer
-        source_name   : str — filename of the document being viewed
-        n_results     : int — number of chunks to retrieve
-        """
+        
         if not selected_text.strip():
             raise RetrievalError("Selected text cannot be empty", sys)
 

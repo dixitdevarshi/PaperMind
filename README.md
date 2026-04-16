@@ -1,1 +1,1 @@
-## PaperMind
+## PaperMind - Multilingual Document Intelligence System using RAG

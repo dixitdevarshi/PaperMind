@@ -1,9 +1,3 @@
-"""
-extractor_tool.py
-─────────────────
-Structured extraction tool — triggered when user asks to extract or list items.
-"""
-
 from src.logger import get_logger
 from src.components.retriever import Retriever
 from src.components.answer_generator import AnswerGenerator
@@ -19,15 +13,7 @@ EXTRACT_INSTRUCTION = (
 
 
 class ExtractorTool:
-    """
-    Structured data extraction tool.
-
-    Usage
-    -----
-    tool   = ExtractorTool(retriever, generator)
-    result = tool.run("List all data subject rights mentioned in the GDPR")
-    """
-
+    
     name        = "extractor"
     description = "Extracts and lists structured information from documents."
 
@@ -37,13 +23,7 @@ class ExtractorTool:
         logger.info("ExtractorTool ready")
 
     def run(self, query: str, n_results: int = 8) -> dict:
-        """
-        Retrieve chunks and extract structured information.
-
-        Returns
-        -------
-        dict with keys: answer, sources, confidence, tool_used, model_used
-        """
+        
         logger.info(f"ExtractorTool — query: '{query[:80]}'")
 
         chunks    = self.retriever.retrieve(query, n_results=n_results)

@@ -1,18 +1,3 @@
-"""
-answer_generator.py
-───────────────────
-Generates grounded answers using Claude API with source attribution,
-conversation memory, and automatic language detection/response.
-
-Responsibilities:
-  1. Accept a query + list of RetrievedChunks
-  2. Build a grounded prompt with retrieved context
-  3. Call Claude Sonnet for final answer generation
-  4. Maintain conversation memory across multi-turn sessions
-  5. Return answer + source attribution + confidence summary
-  6. Support streaming responses
-"""
-
 import sys
 from typing import Generator
 
@@ -48,14 +33,6 @@ Rules:
 # ── Main class ───────────────────────────────────────────────────────────────
 
 class AnswerGenerator:
-    """
-    Generates answers using Claude API with retrieved context.
-
-    Usage
-    -----
-    generator = AnswerGenerator()
-    response  = generator.generate(query, chunks)
-    """
 
     def __init__(self):
         self.client = anthropic.Anthropic()
@@ -68,17 +45,7 @@ class AnswerGenerator:
     # ── Public API ───────────────────────────────────────────
 
     def generate(self, query: str, chunks: list[RetrievedChunk]) -> dict:
-        """
-        Generate a grounded answer for the query using retrieved chunks.
 
-        Returns
-        -------
-        dict with keys:
-            answer      : str   — Claude's answer
-            sources     : list  — source attribution dicts
-            confidence  : str   — overall confidence (top chunk's level)
-            model_used  : str   — which Claude model was used
-        """
         if not query.strip():
             raise LLMError("Query cannot be empty", sys)
 
@@ -120,15 +87,6 @@ class AnswerGenerator:
         query:  str,
         chunks: list[RetrievedChunk],
     ) -> Generator[str, None, None]:
-        """
-        Streaming version of generate().
-        Yields answer tokens one by one as they arrive from Claude.
-
-        Usage
-        -----
-        for token in generator.generate_stream(query, chunks):
-            print(token, end="", flush=True)
-        """
         if not query.strip():
             raise LLMError("Query cannot be empty", sys)
 

@@ -1,15 +1,3 @@
-"""
-embedding_engine.py
-───────────────────
-Handles embedding generation and ChromaDB vector store operations.
-
-Responsibilities:
-  1. Load paraphrase-multilingual-MiniLM-L12-v2 (local, free, 50+ languages)
-  2. Generate embeddings for a list of LangChain Documents
-  3. Store embeddings + text + metadata in ChromaDB (persistent)
-  4. Provide add, query, delete, and list operations on the vector store
-"""
-
 import sys
 import uuid
 from pathlib import Path
@@ -35,15 +23,6 @@ BATCH_SIZE       = 64   # embed this many chunks at once
 # ── Main class ───────────────────────────────────────────────────────────────
 
 class EmbeddingEngine:
-    """
-    Manages embeddings and the ChromaDB vector store.
-
-    Usage
-    -----
-    engine = EmbeddingEngine()
-    engine.add_documents(docs)          # ingest LangChain Documents
-    results = engine.query("What is GDPR?", n_results=5)
-    """
 
     def __init__(self):
         # Load embedding model (downloads once, cached locally by HuggingFace)
