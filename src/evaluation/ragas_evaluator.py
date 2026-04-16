@@ -18,7 +18,7 @@ from src.utils import save_json, load_json
 
 logger = get_logger(__name__)
 
-# ── Constants ────────────────────────────────────────────────────────────────
+#Constants
 
 METRICS = [
     faithfulness,
@@ -38,7 +38,7 @@ class RagasEvaluator:
         self.pipeline = QueryPipeline()
         logger.info("RagasEvaluator ready")
 
-    # ── Public API ───────────────────────────────────────────
+    #Public API
 
     def evaluate(
         self,
@@ -93,8 +93,7 @@ class RagasEvaluator:
 
         return scores
 
-    # ── Internal ─────────────────────────────────────────────
-
+    #Internal
     def _build_dataset(self, qa_pairs: list[dict]) -> Dataset:
         
         questions:   list[str]       = []

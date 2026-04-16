@@ -10,7 +10,7 @@ from src.components.answer_generator import AnswerGenerator
 
 logger = get_logger(__name__)
 
-# ── Tool routing keywords ────────────────────────────────────────────────────
+#Tool routing keywords
 
 SUMMARIZE_KEYWORDS  = ["summarize", "summary", "overview", "zusammenfassung", "résumé"]
 COMPARE_KEYWORDS    = ["compare", "difference", "versus", "vs", "vergleich", "comparer"]
@@ -25,7 +25,7 @@ class QueryPipeline:
         self.generator = AnswerGenerator()
         logger.info("QueryPipeline ready")
 
-    # ── Public API ───────────────────────────────────────────
+    #Public API
 
     def query(self, question: str, n_results: int = 5) -> dict:
         
@@ -104,8 +104,7 @@ class QueryPipeline:
         self.generator.clear_memory()
         logger.info("QueryPipeline memory cleared")
 
-    # ── Internal ─────────────────────────────────────────────
-
+    #Internal
     def _retrieve(self, question: str, n_results: int) -> list[RetrievedChunk]:
         try:
             return self.retriever.retrieve(question, n_results=n_results)

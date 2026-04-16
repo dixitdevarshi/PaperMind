@@ -7,12 +7,11 @@ from src.components.embedding_engine import EmbeddingEngine
 
 logger = get_logger(__name__)
 
-# ── Confidence thresholds ────────────────────────────────────────────────────
-
+#Confidence thresholds
 HIGH_THRESHOLD   = 0.75
 MEDIUM_THRESHOLD = 0.50
 
-# ── Data class ───────────────────────────────────────────────────────────────
+#Data class
 
 @dataclass
 class RetrievedChunk:
@@ -26,7 +25,7 @@ class RetrievedChunk:
     doc_type:   str
 
 
-# ── Main class ───────────────────────────────────────────────────────────────
+#Main class
 
 class Retriever:
     
@@ -126,7 +125,7 @@ class Retriever:
         chunks.sort(key=lambda c: c.score, reverse=True)
         return chunks
 
-    # ── Internal ─────────────────────────────────────────────
+    #Internal
 
     @staticmethod
     def _assign_confidence(score: float) -> str:

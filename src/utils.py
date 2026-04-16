@@ -9,7 +9,7 @@ from src.logger import get_logger
 logger = get_logger(__name__)
 
 
-# ── File I/O ─────────────────────────────────────────────────────────────────
+#File I/O 
 
 def save_json(data: Any, path: str) -> None:
     path = Path(path)
@@ -42,7 +42,7 @@ def load_pickle(path: str) -> Any:
     return obj
 
 
-# ── Path helpers ─────────────────────────────────────────────────────────────
+#Path helpers
 
 def get_project_root() -> Path:
     return Path(__file__).resolve().parents[1]
@@ -60,7 +60,7 @@ def get_uploads_path() -> Path:
     return path
 
 
-# ── Text helpers ─────────────────────────────────────────────────────────────
+#Text helpers 
 
 def truncate_text(text: str, max_chars: int = 300) -> str:
     if len(text) <= max_chars:

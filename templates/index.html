@@ -389,7 +389,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
-  // ── PDF.js setup ─────────────────────────────────────────
+  // PDF.js setup
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
@@ -401,7 +401,7 @@
   let currentSource = null;
   let selectedText  = "";
 
-  // ── Load PDF into viewer ─────────────────────────────────
+  // Load PDF into viewer
   async function loadPDF(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -437,7 +437,7 @@
     }
   }
 
-  // ── Render a PDF page with text layer ───────────────────
+  // Render a PDF page with text layer
   async function renderPage(num) {
     const page     = await pdfDoc.getPage(num);
     const viewport = page.getViewport({ scale: 1.4 });
@@ -460,7 +460,7 @@
     document.getElementById("page-info").textContent =
       `${num} / ${pdfDoc.numPages}`;
 
-    // ── Build text layer ──────────────────────────────────
+    // Build text layer
     const textLayerDiv = document.getElementById("pdf-text-layer");
     textLayerDiv.innerHTML = "";                  // clear previous page
     textLayerDiv.style.width  = viewport.width  + "px";
@@ -504,7 +504,7 @@
     renderPage(currentPage);
   }
 
-  // ── Text selection → auto-populate chat ─────────────────
+  //Text selection → auto-populate chat
   document.getElementById("pdf-text-layer") &&
   document.addEventListener("mouseup", () => {
     const sel = window.getSelection().toString().trim();
@@ -540,7 +540,7 @@
       "Ask a question in any language...";
   }
 
-  // ── Upload image ─────────────────────────────────────────
+  //Upload image
   async function uploadImage(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -564,7 +564,7 @@
     }
   }
 
-  // ── Send question ────────────────────────────────────────
+  //Send question 
   async function sendQuestion() {
     const input    = document.getElementById("chat-input");
     const question = input.value.trim();
@@ -615,7 +615,7 @@
     }
   }
 
-  // ── Render answer with markdown + sources ────────────────
+  // Render answer with markdown + sources 
   function addAnswerMessage(data) {
     const container = document.getElementById("chat-messages");
     const div       = document.createElement("div");
@@ -653,7 +653,7 @@
     container.scrollTop = container.scrollHeight;
   }
 
-  // ── Helper: add simple message ───────────────────────────
+  // Helper: add simple message 
   function addMessage(role, html) {
     const container = document.getElementById("chat-messages");
     const div       = document.createElement("div");
@@ -670,7 +670,7 @@
     container.scrollTop = container.scrollHeight;
   }
 
-  // ── Typing indicator ─────────────────────────────────────
+  // Typing indicator 
   function addTyping() {
     const container = document.getElementById("chat-messages");
     const div       = document.createElement("div");
@@ -690,7 +690,7 @@
     if (el) el.remove();
   }
 
-  // ── Refresh document list ────────────────────────────────
+  // Refresh document list 
   async function refreshDocList() {
     try {
       const res  = await fetch("/documents");
@@ -708,13 +708,13 @@
     }
   }
 
-  // ── Clear memory ─────────────────────────────────────────
+  // Clear memory 
   async function clearMemory() {
     await fetch("/memory/clear", { method: "POST" });
     addMessage("system", "🧹 Conversation memory cleared");
   }
 
-  // ── Init ─────────────────────────────────────────────────
+  // Init 
   refreshDocList();
 </script>
 

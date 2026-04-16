@@ -19,7 +19,7 @@ from src.utils import get_uploads_path
 load_dotenv()
 logger = get_logger(__name__)
 
-# ── App setup ────────────────────────────────────────────────────────────────
+# App setup 
 
 app = FastAPI(
     title="PaperMind",
@@ -30,12 +30,12 @@ app = FastAPI(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# ── Pipeline singletons ──────────────────────────────────────────────────────
+# Pipeline singletons 
 
 index_pipeline = IndexPipeline()
 query_pipeline = QueryPipeline()
 
-# ── Request models ───────────────────────────────────────────────────────────
+# Request models 
 
 class QueryRequest(BaseModel):
     question:  str
@@ -47,7 +47,7 @@ class SelectionQueryRequest(BaseModel):
     question:      str
     n_results:     int = 5
 
-# ── Routes ───────────────────────────────────────────────────────────────────
+# Routes 
 
 @app.get("/")
 async def root(request: Request):
@@ -179,7 +179,7 @@ async def evaluate():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ── Entry point ──────────────────────────────────────────────────────────────
+# Entry point 
 
 if __name__ == "__main__":
     import uvicorn

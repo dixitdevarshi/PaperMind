@@ -13,14 +13,14 @@ from src.exception import DocumentLoadError
 
 logger = get_logger(__name__)
 
-# ── Constants ────────────────────────────────────────────────────────────────
+#Constants
 
 CHUNK_SIZE    = 500
 CHUNK_OVERLAP = 100
 MIN_CHUNK_LEN = 50
 HEADING_MAX_LEN = 80
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
+#Helpers
 
 def _clean_text(raw: str) -> str:
     """Normalise unicode, remove PDF artefacts, collapse excess whitespace."""
@@ -68,8 +68,7 @@ def _nearest_section(char_start: int, sections: dict[int, str]) -> str:
     return best
 
 
-# ── Main class ───────────────────────────────────────────────────────────────
-
+#Main class
 class DocumentLoader:
     def __init__(self, chunk_size: int = CHUNK_SIZE, chunk_overlap: int = CHUNK_OVERLAP):
         self.chunk_size    = chunk_size

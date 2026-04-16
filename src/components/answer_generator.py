@@ -10,14 +10,13 @@ from src.components.retriever import RetrievedChunk
 
 logger = get_logger(__name__)
 
-# ── Model config ─────────────────────────────────────────────────────────────
+#Model config
 
 SONNET_MODEL = "claude-sonnet-4-6"
 HAIKU_MODEL  = "claude-haiku-4-5-20251001"
 MAX_TOKENS   = 1024
 
-# ── System prompt ────────────────────────────────────────────────────────────
-
+#System prompt
 SYSTEM_PROMPT = """You are PaperMind, an intelligent document assistant.
 
 Your job is to answer questions based ONLY on the provided document context.
@@ -30,8 +29,7 @@ Rules:
 5. Be concise and precise. Do not pad your answer with unnecessary text.
 6. If comparing across documents, clearly label which document each point comes from."""
 
-# ── Main class ───────────────────────────────────────────────────────────────
-
+#Main class
 class AnswerGenerator:
 
     def __init__(self):
@@ -42,7 +40,7 @@ class AnswerGenerator:
         )
         logger.info("AnswerGenerator ready")
 
-    # ── Public API ───────────────────────────────────────────
+    #Public API
 
     def generate(self, query: str, chunks: list[RetrievedChunk]) -> dict:
 
@@ -120,8 +118,7 @@ class AnswerGenerator:
         self.memory.clear()
         logger.info("Conversation memory cleared")
 
-    # ── Internal ─────────────────────────────────────────────
-
+    #Internal
     def _build_context(self, chunks: list[RetrievedChunk]) -> str:
         """Format retrieved chunks into a numbered context block for the prompt."""
         if not chunks:

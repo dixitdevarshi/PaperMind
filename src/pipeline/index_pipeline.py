@@ -21,7 +21,7 @@ class IndexPipeline:
         self.engine       = EmbeddingEngine()
         logger.info("IndexPipeline ready")
 
-    # ── Public API ───────────────────────────────────────────
+    #Public API 
 
     def ingest_pdf(self, pdf_path: str) -> dict:
         

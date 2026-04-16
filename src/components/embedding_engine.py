@@ -13,17 +13,15 @@ from src.utils import get_vectorstore_path
 
 logger = get_logger(__name__)
 
-# ── Constants ────────────────────────────────────────────────────────────────
+#Constants 
 
 EMBEDDING_MODEL  = "paraphrase-multilingual-MiniLM-L12-v2"
 COLLECTION_NAME  = "papermind_docs"
 BATCH_SIZE       = 64   # embed this many chunks at once
 
 
-# ── Main class ───────────────────────────────────────────────────────────────
-
+#Main class 
 class EmbeddingEngine:
-
     def __init__(self):
         # Load embedding model (downloads once, cached locally by HuggingFace)
         logger.info(f"Loading embedding model: {EMBEDDING_MODEL}")
@@ -52,7 +50,7 @@ class EmbeddingEngine:
             f"collection '{COLLECTION_NAME}' has {self.collection.count()} chunks"
         )
 
-    # ── Public API ───────────────────────────────────────────
+    #Public API
 
     def add_documents(self, documents: list[Document]) -> None:
         """

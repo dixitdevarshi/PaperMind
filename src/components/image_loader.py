@@ -11,7 +11,7 @@ from src.exception import ImageIngestionError
 
 logger = get_logger(__name__)
 
-# ── Constants ────────────────────────────────────────────────────────────────
+#Constants
 
 CHUNK_SIZE    = 500
 CHUNK_OVERLAP = 100
@@ -31,7 +31,7 @@ Preserve the structure: headings, paragraphs, tables, bullet points, numbered li
 Do not summarize, interpret, or add anything.
 Just return the raw extracted text."""
 
-# ── Main class ───────────────────────────────────────────────────────────────
+#Main class
 
 class ImageLoader:
 
@@ -95,7 +95,7 @@ class ImageLoader:
         logger.info(f"Total chunks across {len(image_paths)} images: {len(all_docs)}")
         return all_docs
 
-    # ── Internal ─────────────────────────────────────────────
+    #Internal
 
     def _encode_image(self, image_path: Path) -> str:
         """Read image file and return base64 encoded string."""
