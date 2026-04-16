@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PaperMind — Multilingual Document Intelligence</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f1117;
+      color: #e0e0e0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #1a1d27;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #2a2d3a;
+    }
+    header h1 { font-size: 1.3rem; color: #7c9ef8; font-weight: 600; }
+    header span { font-size: 0.8rem; color: #666; }
+
+    /* ── Main layout ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Left panel — PDF viewer ── */
+    .pdf-panel {
+      width: 55%;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #2a2d3a;
+    }
+
+    .pdf-toolbar {
+      background: #1a1d27;
+      padding: 10px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      border-bottom: 1px solid #2a2d3a;
+      flex-wrap: wrap;
+    }
+
+    .pdf-toolbar input[type="file"] { display: none; }
+
+    button {
+      background: #2a2d3a;
+      color: #e0e0e0;
+      border: 1px solid #3a3d4a;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+    button:hover { background: #3a3d4a; }
+    button.primary { background: #7c9ef8; color: #0f1117; border-color: #7c9ef8; }
+    button.primary:hover { background: #6b8de7; }
+
+    #pdf-canvas-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      background: #16181f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    /* wrapper so canvas + text layer stack correctly */
+    #pdf-page-wrapper {
+      position: relative;
+      display: inline-block;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      border-radius: 4px;
+    }
+
+    #pdf-canvas {
+      display: block;
+      border-radius: 4px;
+    }
+
+    /* ── PDF text layer — enables real text selection ── */
+    #pdf-text-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: auto;
+      overflow: hidden;
+    }
+    #pdf-text-layer span {
+      color: transparent;
+      position: absolute;
+      white-space: pre;
+      cursor: text;
+      transform-origin: 0% 0%;
+    }
+    #pdf-text-layer ::selection {
+      background: rgba(124, 158, 248, 0.35);
+    }
+
+    .pdf-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #444;
+      gap: 12px;
+    }
+
+    .pdf-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    /* ── Right panel — Chat ── */
+    .chat-panel {
+      width: 45%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-toolbar {
+      background: #1a1d27;
+      padding: 10px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      border-bottom: 1px solid #2a2d3a;
+    }
+
+    #doc-list {
+      font-size: 0.8rem;
+      color: #888;
+      padding: 6px 16px;
+      background: #13151e;
+      border-bottom: 1px solid #2a2d3a;
+      min-height: 28px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .message {
+      max-width: 92%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+    .message.user {
+      background: #2a3550;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+    .message.assistant {
+      background: #1e2130;
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+      border: 1px solid #2a2d3a;
+    }
+
+    /* ── Markdown rendering inside assistant messages ── */
+    .message.assistant h1,
+    .message.assistant h2,
+    .message.assistant h3 {
+      color: #7c9ef8;
+      margin: 10px 0 6px;
+      font-size: 1rem;
+    }
+    .message.assistant p  { margin-bottom: 8px; }
+    .message.assistant ul,
+    .message.assistant ol { padding-left: 20px; margin-bottom: 8px; }
+    .message.assistant li { margin-bottom: 4px; }
+    .message.assistant strong { color: #c8d8ff; }
+    .message.assistant code {
+      background: #2a2d3a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-family: monospace;
+    }
+    .message.assistant blockquote {
+      border-left: 3px solid #7c9ef8;
+      padding-left: 10px;
+      color: #999;
+      margin: 6px 0;
+    }
+    .message.assistant hr {
+      border: none;
+      border-top: 1px solid #2a2d3a;
+      margin: 8px 0;
+    }
+
+    .message .sources {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #2a2d3a;
+      font-size: 0.78rem;
+      color: #888;
+    }
+    .message .confidence {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .confidence.High   { background: #1a3a2a; color: #4caf7d; }
+    .confidence.Medium { background: #3a2e1a; color: #f0a843; }
+    .confidence.Low    { background: #3a1a1a; color: #e05c5c; }
+
+    /* ── Selection hint ── */
+    #selection-hint {
+      background: #1e2a1e;
+      border: 1px solid #2d4a2d;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin: 0 16px 8px;
+      font-size: 0.8rem;
+      color: #4caf7d;
+      display: none;
+    }
+
+    /* ── Chat input ── */
+    .chat-input-area {
+      padding: 12px 16px;
+      background: #1a1d27;
+      border-top: 1px solid #2a2d3a;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #chat-input {
+      width: 100%;
+      background: #13151e;
+      border: 1px solid #2a2d3a;
+      border-radius: 8px;
+      color: #e0e0e0;
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      resize: none;
+      outline: none;
+      font-family: inherit;
+    }
+    #chat-input:focus { border-color: #7c9ef8; }
+
+    .input-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .input-row span { font-size: 0.75rem; color: #555; }
+
+    /* ── Typing indicator ── */
+    .typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+    .typing span {
+      width: 6px; height: 6px; background: #7c9ef8;
+      border-radius: 50%; animation: bounce 1.2s infinite;
+    }
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40%           { transform: translateY(-6px); }
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📄 PaperMind</h1>
+  <span>Multilingual Document Intelligence</span>
+</header>
+
+<div class="main">
+
+  <!-- ── Left: PDF Viewer ── -->
+  <div class="pdf-panel">
+    <div class="pdf-toolbar">
+      <label for="pdf-upload">
+        <button onclick="document.getElementById('pdf-upload').click()">
+          📂 Open PDF
+        </button>
+      </label>
+      <input type="file" id="pdf-upload" accept=".pdf" onchange="loadPDF(event)"/>
+
+      <label for="img-upload">
+        <button onclick="document.getElementById('img-upload').click()">
+          🖼 Upload Image
+        </button>
+      </label>
+      <input type="file" id="img-upload" accept=".png,.jpg,.jpeg,.webp"
+             onchange="uploadImage(event)"/>
+
+      <div class="pdf-nav">
+        <button onclick="changePage(-1)">◀</button>
+        <span id="page-info">— / —</span>
+        <button onclick="changePage(1)">▶</button>
+      </div>
+    </div>
+
+    <div id="pdf-canvas-container">
+      <div class="pdf-placeholder" id="pdf-placeholder">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="#888">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0
+                   0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/>
+        </svg>
+        <p>Open a PDF to get started</p>
+        <p style="font-size:0.8rem;color:#555">Select text to ask questions about it</p>
+      </div>
+
+      <!-- canvas + text layer wrapped together -->
+      <div id="pdf-page-wrapper" style="display:none">
+        <canvas id="pdf-canvas"></canvas>
+        <div id="pdf-text-layer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Right: Chat ── -->
+  <div class="chat-panel">
+    <div class="chat-toolbar">
+      <button class="primary" onclick="refreshDocList()">🔄 Refresh Docs</button>
+      <button onclick="clearMemory()">🧹 Clear Memory</button>
+    </div>
+
+    <div id="doc-list">No documents ingested yet.</div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div class="message assistant">
+        👋 Welcome to <strong>PaperMind</strong>!<br><br>
+        1. Open a PDF using the button on the left<br>
+        2. The document will be ingested automatically<br>
+        3. Ask questions in any language<br>
+        4. Select text in the PDF to ask about a specific passage
+      </div>
+    </div>
+
+    <div id="selection-hint"></div>
+
+    <div class="chat-input-area">
+      <textarea id="chat-input" rows="3"
+        placeholder="Ask a question in any language..."
+        onkeydown="handleKey(event)"></textarea>
+      <div class="input-row">
+        <span id="selection-label"></span>
+        <button class="primary" onclick="sendQuestion()">Send ↵</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PDF.js from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script>
+  // ── PDF.js setup ─────────────────────────────────────────
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+  // Configure marked for safe rendering
+  marked.setOptions({ breaks: true, gfm: true });
+
+  let pdfDoc        = null;
+  let currentPage   = 1;
+  let currentSource = null;
+  let selectedText  = "";
+
+  // ── Load PDF into viewer ─────────────────────────────────
+  async function loadPDF(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    currentSource = file.name;
+
+    const arrayBuffer = await file.arrayBuffer();
+    pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    currentPage = 1;
+
+    document.getElementById("pdf-placeholder").style.display  = "none";
+    document.getElementById("pdf-page-wrapper").style.display = "inline-block";
+
+    renderPage(currentPage);
+
+    // Ingest into backend
+    addMessage("system", `📂 Ingesting <strong>${file.name}</strong>...`);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res  = await fetch("/ingest/pdf", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.status === "success") {
+        addMessage("system",
+          `✅ <strong>${file.name}</strong> ingested — ${data.chunks_added} chunks stored`);
+        refreshDocList();
+      } else {
+        addMessage("system", `❌ Ingestion failed: ${data.status}`);
+      }
+    } catch (e) {
+      addMessage("system", `❌ Error: ${e.message}`);
+    }
+  }
+
+  // ── Render a PDF page with text layer ───────────────────
+  async function renderPage(num) {
+    const page     = await pdfDoc.getPage(num);
+    const viewport = page.getViewport({ scale: 1.4 });
+    const canvas   = document.getElementById("pdf-canvas");
+    const ctx      = canvas.getContext("2d");
+
+    // Size the canvas
+    canvas.width  = viewport.width;
+    canvas.height = viewport.height;
+
+    // Size the wrapper to match
+    const wrapper = document.getElementById("pdf-page-wrapper");
+    wrapper.style.width  = viewport.width  + "px";
+    wrapper.style.height = viewport.height + "px";
+
+    // Render the PDF page pixels
+    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    // Update page counter
+    document.getElementById("page-info").textContent =
+      `${num} / ${pdfDoc.numPages}`;
+
+    // ── Build text layer ──────────────────────────────────
+    const textLayerDiv = document.getElementById("pdf-text-layer");
+    textLayerDiv.innerHTML = "";                  // clear previous page
+    textLayerDiv.style.width  = viewport.width  + "px";
+    textLayerDiv.style.height = viewport.height + "px";
+
+    const textContent = await page.getTextContent();
+
+    // Place each text item as a transparent span
+    textContent.items.forEach(item => {
+      const tx = pdfjsLib.Util.transform(
+        pdfjsLib.Util.transform(viewport.transform, item.transform),
+        [1, 0, 0, -1, 0, 0]
+      );
+      const style     = textContent.styles[item.fontName];
+      const fontSize  = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
+      const fontAscent = style && style.ascent
+        ? style.ascent * fontSize
+        : fontSize;
+
+      const span = document.createElement("span");
+      span.textContent = item.str;
+      span.style.cssText = `
+        left:             ${tx[4]}px;
+        top:              ${tx[5] - fontAscent}px;
+        font-size:        ${fontSize}px;
+        font-family:      ${style ? style.fontFamily : "sans-serif"};
+        transform:        scaleX(${item.width > 0
+                            ? (item.width * viewport.scale) /
+                              (fontSize * item.str.length * 0.6)
+                            : 1});
+      `;
+      textLayerDiv.appendChild(span);
+    });
+  }
+
+  function changePage(delta) {
+    if (!pdfDoc) return;
+    const next = currentPage + delta;
+    if (next < 1 || next > pdfDoc.numPages) return;
+    currentPage = next;
+    renderPage(currentPage);
+  }
+
+  // ── Text selection → auto-populate chat ─────────────────
+  document.getElementById("pdf-text-layer") &&
+  document.addEventListener("mouseup", () => {
+    const sel = window.getSelection().toString().trim();
+    if (!sel || sel.length < 3) return;
+
+    // Only trigger if selection is inside the PDF panel
+    const anchor = window.getSelection().anchorNode;
+    const textLayer = document.getElementById("pdf-text-layer");
+    if (!textLayer || !textLayer.contains(anchor)) return;
+
+    selectedText = sel;
+    const hint  = document.getElementById("selection-hint");
+    const label = document.getElementById("selection-label");
+
+    hint.style.display = "block";
+    hint.textContent   =
+      `📌 Selected: "${sel.substring(0, 80)}${sel.length > 80 ? "..." : ""}"`;
+    label.textContent  = "📌 Asking about selection";
+    document.getElementById("chat-input").placeholder =
+      "Ask about the selected text...";
+  });
+
+  // Clear selection when input is manually cleared
+  document.getElementById("chat-input").addEventListener("input", function() {
+    if (!this.value.trim()) clearSelection();
+  });
+
+  function clearSelection() {
+    selectedText = "";
+    document.getElementById("selection-hint").style.display = "none";
+    document.getElementById("selection-label").textContent  = "";
+    document.getElementById("chat-input").placeholder =
+      "Ask a question in any language...";
+  }
+
+  // ── Upload image ─────────────────────────────────────────
+  async function uploadImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    addMessage("system", `🖼 Ingesting image <strong>${file.name}</strong>...`);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res  = await fetch("/ingest/image", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.status === "success") {
+        addMessage("system",
+          `✅ <strong>${file.name}</strong> ingested — ${data.chunks_added} chunks stored`);
+        refreshDocList();
+      } else {
+        addMessage("system", `❌ Ingestion failed: ${data.status}`);
+      }
+    } catch (e) {
+      addMessage("system", `❌ Error: ${e.message}`);
+    }
+  }
+
+  // ── Send question ────────────────────────────────────────
+  async function sendQuestion() {
+    const input    = document.getElementById("chat-input");
+    const question = input.value.trim();
+    if (!question) return;
+
+    addMessage("user", question);
+    input.value = "";
+
+    const typingId = addTyping();
+
+    try {
+      let data;
+
+      if (selectedText && currentSource) {
+        const res = await fetch("/query/selection", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            selected_text: selectedText,
+            source_name:   currentSource,
+            question,
+          }),
+        });
+        data = await res.json();
+      } else {
+        const res = await fetch("/query", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question }),
+        });
+        data = await res.json();
+      }
+
+      removeTyping(typingId);
+      addAnswerMessage(data);
+      clearSelection();
+
+    } catch (e) {
+      removeTyping(typingId);
+      addMessage("assistant", `❌ Error: ${e.message}`);
+    }
+  }
+
+  function handleKey(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendQuestion();
+    }
+  }
+
+  // ── Render answer with markdown + sources ────────────────
+  function addAnswerMessage(data) {
+    const container = document.getElementById("chat-messages");
+    const div       = document.createElement("div");
+    div.className   = "message assistant";
+
+    const confidence = data.confidence || "Low";
+
+    // Confidence badge
+    let html = `<span class="confidence ${confidence}">${confidence} Confidence</span>`;
+
+    // Render answer as markdown
+    html += marked.parse(data.answer || "No answer returned.");
+
+    // Sources
+    if (data.sources && data.sources.length > 0) {
+      html += `<div class="sources"><strong>📚 Sources:</strong><br>`;
+      data.sources.forEach(s => {
+        html += `📄 <strong>${s.document}</strong> — Page ${s.page}`;
+        if (s.section && s.section !== "Unknown") {
+          html += ` — <em>${s.section}</em>`;
+        }
+        html += `<br>`;
+      });
+      html += `</div>`;
+    }
+
+    // Tool used
+    if (data.tool_used) {
+      html += `<div style="margin-top:6px;font-size:0.75rem;color:#444">
+               🔧 Tool: ${data.tool_used}</div>`;
+    }
+
+    div.innerHTML = html;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // ── Helper: add simple message ───────────────────────────
+  function addMessage(role, html) {
+    const container = document.getElementById("chat-messages");
+    const div       = document.createElement("div");
+
+    if (role === "system") {
+      div.style.cssText =
+        "font-size:0.8rem;color:#666;text-align:center;padding:4px 0";
+    } else {
+      div.className = `message ${role}`;
+    }
+
+    div.innerHTML = html;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // ── Typing indicator ─────────────────────────────────────
+  function addTyping() {
+    const container = document.getElementById("chat-messages");
+    const div       = document.createElement("div");
+    const id        = "typing-" + Date.now();
+    div.id          = id;
+    div.className   = "message assistant";
+    div.innerHTML   = `<div class="typing">
+                         <span></span><span></span><span></span>
+                       </div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    return id;
+  }
+
+  function removeTyping(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  }
+
+  // ── Refresh document list ────────────────────────────────
+  async function refreshDocList() {
+    try {
+      const res  = await fetch("/documents");
+      const data = await res.json();
+      const el   = document.getElementById("doc-list");
+      if (data.documents.length === 0) {
+        el.textContent = "No documents ingested yet.";
+      } else {
+        el.innerHTML = "📚 " + data.documents
+          .map(d => `<strong>${d}</strong>`)
+          .join(" &nbsp;|&nbsp; ");
+      }
+    } catch (e) {
+      console.error("Failed to refresh doc list:", e);
+    }
+  }
+
+  // ── Clear memory ─────────────────────────────────────────
+  async function clearMemory() {
+    await fetch("/memory/clear", { method: "POST" });
+    addMessage("system", "🧹 Conversation memory cleared");
+  }
+
+  // ── Init ─────────────────────────────────────────────────
+  refreshDocList();
+</script>
+
+</body>
+</html>
