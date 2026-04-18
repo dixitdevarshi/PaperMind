@@ -17,7 +17,6 @@
       flex-direction: column;
     }
 
-    /* ── Header ── */
     header {
       background: #1a1d27;
       padding: 12px 24px;
@@ -29,14 +28,8 @@
     header h1 { font-size: 1.3rem; color: #7c9ef8; font-weight: 600; }
     header span { font-size: 0.8rem; color: #666; }
 
-    /* ── Main layout ── */
-    .main {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
+    .main { display: flex; flex: 1; overflow: hidden; }
 
-    /* ── Left panel — PDF viewer ── */
     .pdf-panel {
       width: 55%;
       display: flex;
@@ -53,7 +46,6 @@
       border-bottom: 1px solid #2a2d3a;
       flex-wrap: wrap;
     }
-
     .pdf-toolbar input[type="file"] { display: none; }
 
     button {
@@ -79,10 +71,8 @@
       flex-direction: column;
       align-items: center;
       gap: 12px;
-      position: relative;
     }
 
-    /* wrapper so canvas + text layer stack correctly */
     #pdf-page-wrapper {
       position: relative;
       display: inline-block;
@@ -90,19 +80,20 @@
       border-radius: 4px;
     }
 
-    #pdf-canvas {
-      display: block;
-      border-radius: 4px;
-    }
+    #pdf-canvas { display: block; border-radius: 4px; }
 
-    /* ── PDF text layer — enables real text selection ── */
     #pdf-text-layer {
       position: absolute;
       top: 0;
       left: 0;
-      pointer-events: auto;
+      right: 0;
+      bottom: 0;
       overflow: hidden;
+      opacity: 1;
+      line-height: 1;
+      pointer-events: auto;
     }
+
     #pdf-text-layer span {
       color: transparent;
       position: absolute;
@@ -110,8 +101,10 @@
       cursor: text;
       transform-origin: 0% 0%;
     }
+
     #pdf-text-layer ::selection {
-      background: rgba(124, 158, 248, 0.35);
+      background: rgba(124, 158, 248, 0.4);
+      color: transparent;
     }
 
     .pdf-placeholder {
@@ -132,12 +125,7 @@
       color: #888;
     }
 
-    /* ── Right panel — Chat ── */
-    .chat-panel {
-      width: 45%;
-      display: flex;
-      flex-direction: column;
-    }
+    .chat-panel { width: 45%; display: flex; flex-direction: column; }
 
     .chat-toolbar {
       background: #1a1d27;
@@ -185,14 +173,9 @@
       border: 1px solid #2a2d3a;
     }
 
-    /* ── Markdown rendering inside assistant messages ── */
     .message.assistant h1,
     .message.assistant h2,
-    .message.assistant h3 {
-      color: #7c9ef8;
-      margin: 10px 0 6px;
-      font-size: 1rem;
-    }
+    .message.assistant h3 { color: #7c9ef8; margin: 10px 0 6px; font-size: 1rem; }
     .message.assistant p  { margin-bottom: 8px; }
     .message.assistant ul,
     .message.assistant ol { padding-left: 20px; margin-bottom: 8px; }
@@ -211,11 +194,6 @@
       color: #999;
       margin: 6px 0;
     }
-    .message.assistant hr {
-      border: none;
-      border-top: 1px solid #2a2d3a;
-      margin: 8px 0;
-    }
 
     .message .sources {
       margin-top: 10px;
@@ -224,19 +202,23 @@
       font-size: 0.78rem;
       color: #888;
     }
-    .message .confidence {
+    .source-tag {
       display: inline-block;
+      background: #1a2535;
+      border: 1px solid #2a3a55;
+      border-radius: 4px;
       padding: 2px 8px;
-      border-radius: 10px;
+      margin: 2px 2px 2px 0;
       font-size: 0.75rem;
-      margin-bottom: 8px;
-      font-weight: 600;
+      color: #7c9ef8;
     }
-    .confidence.High   { background: #1a3a2a; color: #4caf7d; }
-    .confidence.Medium { background: #3a2e1a; color: #f0a843; }
-    .confidence.Low    { background: #3a1a1a; color: #e05c5c; }
+    .no-source-note {
+      font-size: 0.75rem;
+      color: #555;
+      margin-top: 6px;
+      font-style: italic;
+    }
 
-    /* ── Selection hint ── */
     #selection-hint {
       background: #1e2a1e;
       border: 1px solid #2d4a2d;
@@ -248,7 +230,6 @@
       display: none;
     }
 
-    /* ── Chat input ── */
     .chat-input-area {
       padding: 12px 16px;
       background: #1a1d27;
@@ -280,7 +261,6 @@
     }
     .input-row span { font-size: 0.75rem; color: #555; }
 
-    /* ── Typing indicator ── */
     .typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
     .typing span {
       width: 6px; height: 6px; background: #7c9ef8;
@@ -293,7 +273,6 @@
       40%           { transform: translateY(-6px); }
     }
 
-    /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
@@ -308,23 +287,17 @@
 
 <div class="main">
 
-  <!-- ── Left: PDF Viewer ── -->
   <div class="pdf-panel">
     <div class="pdf-toolbar">
       <label for="pdf-upload">
-        <button onclick="document.getElementById('pdf-upload').click()">
-          📂 Open PDF
-        </button>
+        <button onclick="document.getElementById('pdf-upload').click()">📂 Open PDF</button>
       </label>
       <input type="file" id="pdf-upload" accept=".pdf" onchange="loadPDF(event)"/>
 
       <label for="img-upload">
-        <button onclick="document.getElementById('img-upload').click()">
-          🖼 Upload Image
-        </button>
+        <button onclick="document.getElementById('img-upload').click()">🖼 Upload Image</button>
       </label>
-      <input type="file" id="img-upload" accept=".png,.jpg,.jpeg,.webp"
-             onchange="uploadImage(event)"/>
+      <input type="file" id="img-upload" accept=".png,.jpg,.jpeg,.webp" onchange="uploadImage(event)"/>
 
       <div class="pdf-nav">
         <button onclick="changePage(-1)">◀</button>
@@ -343,7 +316,6 @@
         <p style="font-size:0.8rem;color:#555">Select text to ask questions about it</p>
       </div>
 
-      <!-- canvas + text layer wrapped together -->
       <div id="pdf-page-wrapper" style="display:none">
         <canvas id="pdf-canvas"></canvas>
         <div id="pdf-text-layer"></div>
@@ -351,7 +323,6 @@
     </div>
   </div>
 
-  <!-- ── Right: Chat ── -->
   <div class="chat-panel">
     <div class="chat-toolbar">
       <button class="primary" onclick="refreshDocList()">🔄 Refresh Docs</button>
@@ -385,23 +356,20 @@
 
 </div>
 
-<!-- PDF.js from CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
-  // PDF.js setup
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-  // Configure marked for safe rendering
   marked.setOptions({ breaks: true, gfm: true });
 
-  let pdfDoc        = null;
-  let currentPage   = 1;
-  let currentSource = null;
-  let selectedText  = "";
+  let pdfDoc             = null;
+  let currentPage        = 1;
+  let currentSource      = null;
+  let selectedText       = "";
+  let selectionInProgress = false;
 
-  // Load PDF into viewer
   async function loadPDF(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -415,9 +383,8 @@
     document.getElementById("pdf-placeholder").style.display  = "none";
     document.getElementById("pdf-page-wrapper").style.display = "inline-block";
 
-    renderPage(currentPage);
+    await renderPage(currentPage);
 
-    // Ingest into backend
     addMessage("system", `📂 Ingesting <strong>${file.name}</strong>...`);
     const formData = new FormData();
     formData.append("file", file);
@@ -426,8 +393,7 @@
       const res  = await fetch("/ingest/pdf", { method: "POST", body: formData });
       const data = await res.json();
       if (data.status === "success") {
-        addMessage("system",
-          `✅ <strong>${file.name}</strong> ingested — ${data.chunks_added} chunks stored`);
+        addMessage("system", `✅ <strong>${file.name}</strong> ingested — ${data.chunks_added} chunks stored`);
         refreshDocList();
       } else {
         addMessage("system", `❌ Ingestion failed: ${data.status}`);
@@ -437,63 +403,76 @@
     }
   }
 
-  // Render a PDF page with text layer
   async function renderPage(num) {
-    const page     = await pdfDoc.getPage(num);
+    const page = await pdfDoc.getPage(num);
+
+    /*
+      devicePixelRatio is 2 on retina screens, 1 on normal screens.
+      Rendering at 2x physical pixels but displaying at 1x CSS size = sharp PDF.
+    */
+    const DPR      = window.devicePixelRatio || 1;
     const viewport = page.getViewport({ scale: 1.4 });
-    const canvas   = document.getElementById("pdf-canvas");
-    const ctx      = canvas.getContext("2d");
 
-    // Size the canvas
-    canvas.width  = viewport.width;
-    canvas.height = viewport.height;
+    const canvas = document.getElementById("pdf-canvas");
+    const ctx    = canvas.getContext("2d");
 
-    // Size the wrapper to match
+    // Physical pixels
+    canvas.width  = Math.floor(viewport.width  * DPR);
+    canvas.height = Math.floor(viewport.height * DPR);
+
+    // CSS display size
+    canvas.style.width  = Math.floor(viewport.width)  + "px";
+    canvas.style.height = Math.floor(viewport.height) + "px";
+
+    // Wrapper matches CSS display size
     const wrapper = document.getElementById("pdf-page-wrapper");
-    wrapper.style.width  = viewport.width  + "px";
-    wrapper.style.height = viewport.height + "px";
+    wrapper.style.width  = Math.floor(viewport.width)  + "px";
+    wrapper.style.height = Math.floor(viewport.height) + "px";
 
-    // Render the PDF page pixels
+    ctx.scale(DPR, DPR);
     await page.render({ canvasContext: ctx, viewport }).promise;
 
-    // Update page counter
-    document.getElementById("page-info").textContent =
-      `${num} / ${pdfDoc.numPages}`;
+    document.getElementById("page-info").textContent = `${num} / ${pdfDoc.numPages}`;
 
-    // Build text layer
+    /*
+      Text layer: invisible spans placed exactly over each word in the PDF.
+      Transparent so canvas shows through, but browser treats them as real
+      text — so you can click and drag to select like a normal document.
+    */
     const textLayerDiv = document.getElementById("pdf-text-layer");
-    textLayerDiv.innerHTML = "";                  // clear previous page
-    textLayerDiv.style.width  = viewport.width  + "px";
-    textLayerDiv.style.height = viewport.height + "px";
+    textLayerDiv.innerHTML = "";
+    textLayerDiv.style.width  = Math.floor(viewport.width)  + "px";
+    textLayerDiv.style.height = Math.floor(viewport.height) + "px";
 
     const textContent = await page.getTextContent();
 
-    // Place each text item as a transparent span
-    textContent.items.forEach(item => {
-      const tx = pdfjsLib.Util.transform(
-        pdfjsLib.Util.transform(viewport.transform, item.transform),
-        [1, 0, 0, -1, 0, 0]
-      );
-      const style     = textContent.styles[item.fontName];
-      const fontSize  = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
-      const fontAscent = style && style.ascent
-        ? style.ascent * fontSize
-        : fontSize;
-
-      const span = document.createElement("span");
-      span.textContent = item.str;
-      span.style.cssText = `
-        left:             ${tx[4]}px;
-        top:              ${tx[5] - fontAscent}px;
-        font-size:        ${fontSize}px;
-        font-family:      ${style ? style.fontFamily : "sans-serif"};
-        transform:        scaleX(${item.width > 0
-                            ? (item.width * viewport.scale) /
-                              (fontSize * item.str.length * 0.6)
-                            : 1});
-      `;
-      textLayerDiv.appendChild(span);
+    /*
+      PDF.js 3.x expects a ReadableStream for textContentSource.
+      We wrap the textContent object in one. The try/catch handles
+      older builds that accept the object directly.
+    */
+    const textContentStream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(textContent);
+        controller.close();
+      }
     });
+
+    try {
+      await pdfjsLib.renderTextLayer({
+        textContentSource: textContentStream,
+        container:         textLayerDiv,
+        viewport:          viewport,
+        textDivs:          [],
+      }).promise;
+    } catch {
+      pdfjsLib.renderTextLayer({
+        textContent: textContent,
+        container:   textLayerDiv,
+        viewport:    viewport,
+        textDivs:    [],
+      });
+    }
   }
 
   function changePage(delta) {
@@ -504,43 +483,55 @@
     renderPage(currentPage);
   }
 
-  //Text selection → auto-populate chat
-  document.getElementById("pdf-text-layer") &&
-  document.addEventListener("mouseup", () => {
-    const sel = window.getSelection().toString().trim();
-    if (!sel || sel.length < 3) return;
-
-    // Only trigger if selection is inside the PDF panel
-    const anchor = window.getSelection().anchorNode;
+  /*
+    Text selection flow:
+    1. mousedown inside text layer → mark that a selection started there
+    2. mouseup → if selection started in text layer, capture the selected text
+    3. 50ms delay so browser finishes updating window.getSelection()
+    4. Save text, show hint, auto-focus chat input
+    5. Selection is only cleared on Escape or after answer is sent — NOT on input click
+  */
+  document.addEventListener("mousedown", (e) => {
     const textLayer = document.getElementById("pdf-text-layer");
-    if (!textLayer || !textLayer.contains(anchor)) return;
-
-    selectedText = sel;
-    const hint  = document.getElementById("selection-hint");
-    const label = document.getElementById("selection-label");
-
-    hint.style.display = "block";
-    hint.textContent   =
-      `📌 Selected: "${sel.substring(0, 80)}${sel.length > 80 ? "..." : ""}"`;
-    label.textContent  = "📌 Asking about selection";
-    document.getElementById("chat-input").placeholder =
-      "Ask about the selected text...";
+    if (textLayer && textLayer.contains(e.target)) {
+      selectionInProgress = true;
+    }
   });
 
-  // Clear selection when input is manually cleared
-  document.getElementById("chat-input").addEventListener("input", function() {
-    if (!this.value.trim()) clearSelection();
+  document.addEventListener("mouseup", (e) => {
+    if (!selectionInProgress) return;
+    selectionInProgress = false;
+
+    // Small delay so browser finishes updating getSelection()
+    setTimeout(() => {
+      const sel = window.getSelection().toString().trim();
+      if (!sel || sel.length < 3) return;
+
+      selectedText = sel;
+
+      document.getElementById("selection-hint").style.display = "block";
+      document.getElementById("selection-hint").textContent =
+        `📌 Selected: "${sel.substring(0, 80)}${sel.length > 80 ? "..." : ""}"`;
+      document.getElementById("selection-label").textContent = "📌 Asking about selection";
+      document.getElementById("chat-input").placeholder = "Ask about the selected text...";
+
+      // Auto-focus so user can type immediately without clicking
+      document.getElementById("chat-input").focus();
+    }, 50);
+  });
+
+  // Only clear selection on Escape — not on click or input change
+  document.getElementById("chat-input").addEventListener("keydown", function(e) {
+    if (e.key === "Escape") clearSelection();
   });
 
   function clearSelection() {
     selectedText = "";
     document.getElementById("selection-hint").style.display = "none";
     document.getElementById("selection-label").textContent  = "";
-    document.getElementById("chat-input").placeholder =
-      "Ask a question in any language...";
+    document.getElementById("chat-input").placeholder = "Ask a question in any language...";
   }
 
-  //Upload image
   async function uploadImage(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -553,8 +544,7 @@
       const res  = await fetch("/ingest/image", { method: "POST", body: formData });
       const data = await res.json();
       if (data.status === "success") {
-        addMessage("system",
-          `✅ <strong>${file.name}</strong> ingested — ${data.chunks_added} chunks stored`);
+        addMessage("system", `✅ <strong>${file.name}</strong> ingested — ${data.chunks_added} chunks stored`);
         refreshDocList();
       } else {
         addMessage("system", `❌ Ingestion failed: ${data.status}`);
@@ -564,7 +554,6 @@
     }
   }
 
-  //Send question 
   async function sendQuestion() {
     const input    = document.getElementById("chat-input");
     const question = input.value.trim();
@@ -600,6 +589,8 @@
 
       removeTyping(typingId);
       addAnswerMessage(data);
+
+      // Clear selection only after answer is received
       clearSelection();
 
     } catch (e) {
@@ -615,37 +606,25 @@
     }
   }
 
-  // Render answer with markdown + sources 
   function addAnswerMessage(data) {
     const container = document.getElementById("chat-messages");
     const div       = document.createElement("div");
     div.className   = "message assistant";
 
-    const confidence = data.confidence || "Low";
+    let html = marked.parse(data.answer || "No answer returned.");
 
-    // Confidence badge
-    let html = `<span class="confidence ${confidence}">${confidence} Confidence</span>`;
-
-    // Render answer as markdown
-    html += marked.parse(data.answer || "No answer returned.");
-
-    // Sources
     if (data.sources && data.sources.length > 0) {
-      html += `<div class="sources"><strong>📚 Sources:</strong><br>`;
+      html += `<div class="sources">`;
+      const seen = new Set();
       data.sources.forEach(s => {
-        html += `📄 <strong>${s.document}</strong> — Page ${s.page}`;
-        if (s.section && s.section !== "Unknown") {
-          html += ` — <em>${s.section}</em>`;
-        }
-        html += `<br>`;
+        const key = `${s.document}__${s.page}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        html += `<span class="source-tag">📄 ${s.document} · p.${s.page}</span>`;
       });
       html += `</div>`;
-    }
-
-    // Tool used
-    if (data.tool_used) {
-      html += `<div style="margin-top:6px;font-size:0.75rem;color:#444">
-               🔧 Tool: ${data.tool_used}</div>`;
+    } else {
+      html += `<div class="no-source-note">No document loaded — answer based on general context only.</div>`;
     }
 
     div.innerHTML = html;
@@ -653,33 +632,26 @@
     container.scrollTop = container.scrollHeight;
   }
 
-  // Helper: add simple message 
   function addMessage(role, html) {
     const container = document.getElementById("chat-messages");
     const div       = document.createElement("div");
-
     if (role === "system") {
-      div.style.cssText =
-        "font-size:0.8rem;color:#666;text-align:center;padding:4px 0";
+      div.style.cssText = "font-size:0.8rem;color:#666;text-align:center;padding:4px 0";
     } else {
       div.className = `message ${role}`;
     }
-
     div.innerHTML = html;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
   }
 
-  // Typing indicator 
   function addTyping() {
     const container = document.getElementById("chat-messages");
     const div       = document.createElement("div");
     const id        = "typing-" + Date.now();
     div.id          = id;
     div.className   = "message assistant";
-    div.innerHTML   = `<div class="typing">
-                         <span></span><span></span><span></span>
-                       </div>`;
+    div.innerHTML   = `<div class="typing"><span></span><span></span><span></span></div>`;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
     return id;
@@ -690,7 +662,6 @@
     if (el) el.remove();
   }
 
-  // Refresh document list 
   async function refreshDocList() {
     try {
       const res  = await fetch("/documents");
@@ -708,13 +679,11 @@
     }
   }
 
-  // Clear memory 
   async function clearMemory() {
     await fetch("/memory/clear", { method: "POST" });
     addMessage("system", "🧹 Conversation memory cleared");
   }
 
-  // Init 
   refreshDocList();
 </script>
 
