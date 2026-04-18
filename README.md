@@ -34,7 +34,7 @@ came from.
 | Backend | FastAPI |
 | Frontend | HTML + PDF.js |
 | Evaluation | RAGAS (Faithfulness, Answer Relevancy, Context Precision, Context Recall) |
-| Deployment | Docker |
+<!-- | Deployment | Docker | -->
 
 ---
 ## Setup
@@ -63,9 +63,9 @@ Open `http://localhost:8000` in your browser.
 
 ---
 
-## Docker
+<!-- ## Docker
 
 ```bash
 docker build -t papermind .
 docker run -p 8000:8000 --env-file .env papermind
-```
+``` -->
