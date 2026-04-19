@@ -28,7 +28,7 @@ uploads/
 # Jupyter
 .ipynb_checkpoints/
 notebooks/.ipynb_checkpoints/
-
+artifacts/evaluation_qa.json/
 # VS Code
 .vscode/
 
