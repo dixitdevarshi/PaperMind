@@ -33,7 +33,7 @@ came from.
 | Framework | LangChain (text splitting + memory) |
 | Backend | FastAPI |
 | Frontend | HTML + PDF.js |
-| Evaluation | RAGAS (Faithfulness, Answer Relevancy, Context Precision, Context Recall) |
+<!-- | Evaluation | RAGAS (Faithfulness, Answer Relevancy, Context Precision, Context Recall) | -->
 <!-- | Deployment | Docker | -->
 
 ---

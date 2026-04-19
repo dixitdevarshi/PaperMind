@@ -1,5 +1,5 @@
 import sys
-import uuid
+import hashlib
 from pathlib import Path
 
 import chromadb
@@ -13,24 +13,38 @@ from src.utils import get_vectorstore_path
 
 logger = get_logger(__name__)
 
-#Constants 
-
-EMBEDDING_MODEL  = "paraphrase-multilingual-MiniLM-L12-v2"
-COLLECTION_NAME  = "papermind_docs"
-BATCH_SIZE       = 64   # embed this many chunks at once
+EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
+COLLECTION_NAME = "papermind_docs"
+BATCH_SIZE      = 64
 
 
-#Main class 
+def _make_chunk_id(source: str, page: str | int, chunk_index: int, text: str) -> str:
+    """
+    Generate a deterministic ID for a chunk.
+    Same chunk always gets the same ID — prevents duplicates on re-ingest.
+    We hash: filename + page number + chunk index + first 80 chars of text.
+    """
+    raw = f"{source}__{page}__{chunk_index}__{text[:80]}"
+    return hashlib.md5(raw.encode("utf-8")).hexdigest()
+
+
 class EmbeddingEngine:
+    """
+    Manages embeddings and the ChromaDB vector store.
+
+    Usage:
+        engine = EmbeddingEngine()
+        engine.add_documents(docs)
+        results = engine.query("What is GDPR?", n_results=5)
+    """
+
     def __init__(self):
-        # Load embedding model (downloads once, cached locally by HuggingFace)
         logger.info(f"Loading embedding model: {EMBEDDING_MODEL}")
         try:
             self.model = SentenceTransformer(EMBEDDING_MODEL)
         except Exception as e:
             raise EmbeddingError(f"Failed to load embedding model: {e}", sys)
 
-        # Connect to ChromaDB (persistent local storage)
         vectorstore_path = str(get_vectorstore_path())
         logger.info(f"Connecting to ChromaDB at: {vectorstore_path}")
         try:
@@ -40,7 +54,7 @@ class EmbeddingEngine:
             )
             self.collection = self.chroma_client.get_or_create_collection(
                 name=COLLECTION_NAME,
-                metadata={"hnsw:space": "cosine"},  # use cosine similarity
+                metadata={"hnsw:space": "cosine"},
             )
         except Exception as e:
             raise VectorStoreError(f"Failed to connect to ChromaDB: {e}", sys)
@@ -50,12 +64,11 @@ class EmbeddingEngine:
             f"collection '{COLLECTION_NAME}' has {self.collection.count()} chunks"
         )
 
-    #Public API
-
     def add_documents(self, documents: list[Document]) -> None:
         """
         Embed a list of LangChain Documents and store in ChromaDB.
-        Processes in batches to avoid memory issues with large PDFs.
+        Uses deterministic IDs so re-ingesting the same document
+        updates existing chunks instead of creating duplicates.
         """
         if not documents:
             logger.warning("add_documents called with empty list — nothing to do")
@@ -68,7 +81,17 @@ class EmbeddingEngine:
 
             texts     = [doc.page_content for doc in batch]
             metadatas = [doc.metadata     for doc in batch]
-            ids       = [str(uuid.uuid4()) for _  in batch]
+
+            # Deterministic IDs — same chunk = same ID every time
+            ids = [
+                _make_chunk_id(
+                    source=doc.metadata.get("source", "unknown"),
+                    page=doc.metadata.get("page", 0),
+                    chunk_index=doc.metadata.get("chunk_index", i),
+                    text=doc.page_content,
+                )
+                for i, doc in enumerate(batch)
+            ]
 
             try:
                 embeddings = self.model.encode(
@@ -89,22 +112,14 @@ class EmbeddingEngine:
             except Exception as e:
                 raise VectorStoreError(f"ChromaDB upsert failed: {e}", sys)
 
-            logger.info(
-                f"  Stored batch {batch_start // BATCH_SIZE + 1} "
-                f"({len(batch)} chunks)"
-            )
+            logger.info(f"  Stored batch {batch_start // BATCH_SIZE + 1} ({len(batch)} chunks)")
 
-        logger.info(
-            f"Done — collection now has {self.collection.count()} total chunks"
-        )
+        logger.info(f"Done — collection now has {self.collection.count()} total chunks")
 
     def query(self, query_text: str, n_results: int = 5) -> list[dict]:
         """
-        Semantic search: embed the query and return top-n matching chunks.
-
-        Returns
-        -------
-        list of dicts with keys: text, metadata, score
+        Semantic search — embed the query and return top-n matching chunks.
+        Returns list of dicts with keys: text, metadata, score
         """
         if not query_text.strip():
             raise VectorStoreError("Query text cannot be empty", sys)
@@ -126,7 +141,7 @@ class EmbeddingEngine:
         except Exception as e:
             raise VectorStoreError(f"ChromaDB query failed: {e}", sys)
 
-        # ChromaDB returns distances (lower = more similar for cosine).
+        # ChromaDB returns distance (lower = more similar for cosine)
         # Convert to similarity score: score = 1 - distance
         chunks = []
         for text, metadata, distance in zip(
@@ -149,7 +164,7 @@ class EmbeddingEngine:
     def delete_document(self, source_name: str) -> int:
         """
         Remove all chunks belonging to a document by its source filename.
-        Returns the number of chunks deleted.
+        Returns number of chunks deleted.
         """
         try:
             results = self.collection.get(
@@ -170,7 +185,7 @@ class EmbeddingEngine:
             raise VectorStoreError(f"Delete failed for '{source_name}': {e}", sys)
 
     def list_documents(self) -> list[str]:
-        """Return a list of unique source document names in the collection."""
+        """Return list of unique source document names in the collection."""
         try:
             results = self.collection.get(include=["metadatas"])
             sources = list({m["source"] for m in results["metadatas"]})
@@ -179,5 +194,4 @@ class EmbeddingEngine:
             raise VectorStoreError(f"Failed to list documents: {e}", sys)
 
     def count(self) -> int:
-        """Return total number of chunks stored."""
         return self.collection.count()
