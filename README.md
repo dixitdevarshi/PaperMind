@@ -137,8 +137,6 @@ uvicorn app:app --reload
 
 Open `http://localhost:8000` in your browser.
 
-
-
 <!-- ---
 
 ## Docker
