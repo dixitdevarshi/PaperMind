@@ -11,7 +11,7 @@ langchain==0.2.6
 langchain-community==0.2.6
 langchain-core==0.2.10
 langchain-text-splitters==0.2.2
-langsmith==0.1.17
+langsmith==0.1.75
 
 # ── Document Loading ────────────────────────────────────────
 pymupdf==1.24.5
@@ -27,12 +27,9 @@ huggingface-hub==0.23.4
 # ── Vector Store ────────────────────────────────────────────
 chromadb==0.5.3
 
-# ── RAGAS Evaluation ────────────────────────────────────────
-# Note: RAGAS uses OpenAI internally for metric computation
-# Add OPENAI_API_KEY to .env before running evaluation
-ragas==0.1.10
+# ── Evaluation (custom embedding-based, no OpenAI needed) ───
 datasets==2.20.0
-openai==1.30.5
+scikit-learn==1.5.1
 
 # ── Backend ─────────────────────────────────────────────────
 fastapi==0.111.0

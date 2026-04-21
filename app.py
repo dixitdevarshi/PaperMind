@@ -4,7 +4,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
@@ -13,13 +13,11 @@ from pydantic import BaseModel
 from src.logger import get_logger
 from src.pipeline.index_pipeline import IndexPipeline
 from src.pipeline.query_pipeline import QueryPipeline
-from src.evaluation.ragas_evaluator import RagasEvaluator
+from src.evaluation.evaluator import PaperMindEvaluator
 from src.utils import get_uploads_path
 
 load_dotenv()
 logger = get_logger(__name__)
-
-# App setup 
 
 app = FastAPI(
     title="PaperMind",
@@ -30,12 +28,9 @@ app = FastAPI(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Pipeline singletons 
-
 index_pipeline = IndexPipeline()
 query_pipeline = QueryPipeline()
 
-# Request models 
 
 class QueryRequest(BaseModel):
     question:  str
@@ -47,7 +42,6 @@ class SelectionQueryRequest(BaseModel):
     question:      str
     n_results:     int = 5
 
-# Routes 
 
 @app.get("/")
 async def root(request: Request):
@@ -88,10 +82,7 @@ async def ingest_image(file: UploadFile = File(...)):
     suffix  = Path(file.filename).suffix.lower()
 
     if suffix not in allowed:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Unsupported format. Allowed: {allowed}"
-        )
+        raise HTTPException(status_code=400, detail=f"Unsupported format. Allowed: {allowed}")
 
     save_path = get_uploads_path() / file.filename
     with open(save_path, "wb") as f:
@@ -172,14 +163,12 @@ async def clear_memory():
 @app.get("/evaluate")
 async def evaluate():
     try:
-        evaluator = RagasEvaluator()
+        evaluator = PaperMindEvaluator()
         scores    = evaluator.evaluate()
         return {"status": "success", "scores": scores}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-# Entry point 
 
 if __name__ == "__main__":
     import uvicorn

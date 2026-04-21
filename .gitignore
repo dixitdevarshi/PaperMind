@@ -28,7 +28,7 @@ uploads/
 # Jupyter
 .ipynb_checkpoints/
 notebooks/.ipynb_checkpoints/
-artifacts/
+
 # VS Code
 .vscode/
 
