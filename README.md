@@ -6,8 +6,6 @@ It retrieves the most relevant passages from your documents, generates grounded
 answers using Claude, and shows exactly which document and page each answer
 came from.
 
-> 🚧 This project is currently under active development.
-
 ---
 
 ## What it does

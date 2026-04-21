@@ -50,18 +50,6 @@ class PaperMindEvaluator:
         qa_path:      str | None        = None,
         save_results: bool              = True,
     ) -> dict:
-        """
-        Run evaluation on QA pairs.
-
-        Parameters:
-            qa_pairs     : list of {question, ground_truth} dicts
-            qa_path      : path to JSON file with QA pairs
-            save_results : save scores to artifacts/evaluation_results.json
-
-        Returns:
-            dict with keys: answer_relevancy, faithfulness,
-                            context_precision, context_recall, num_evaluated
-        """
         if qa_pairs is None:
             path = qa_path or str(DEFAULT_QA_PATH)
             logger.info(f"Loading QA pairs from: {path}")
@@ -133,10 +121,7 @@ class PaperMindEvaluator:
     # Metric implementations
 
     def _answer_relevancy(self, question: str, answer: str) -> float:
-        """
-        Cosine similarity between question embedding and answer embedding.
-        A relevant answer should be semantically close to the question.
-        """
+        
         q_emb = self.model.encode(question, convert_to_numpy=True)
         a_emb = self.model.encode(answer,   convert_to_numpy=True)
         return _cosine_similarity(q_emb, a_emb)
@@ -163,10 +148,7 @@ class PaperMindEvaluator:
         return grounded / len(sentences)
 
     def _context_precision(self, question: str, contexts: list[str]) -> float:
-        """
-        Fraction of retrieved chunks that are relevant to the question.
-        Relevant = cosine similarity above RELEVANCE_THRESHOLD.
-        """
+        
         if not contexts:
             return 0.0
 
@@ -180,12 +162,7 @@ class PaperMindEvaluator:
         return relevant / len(contexts)
 
     def _context_recall(self, ground_truth: str, contexts: list[str]) -> float:
-        """
-        Whether the retrieved context covers the ground truth.
-        Splits ground truth into sentences and checks if each sentence
-        is represented in at least one retrieved chunk above RECALL_THRESHOLD.
-        Returns fraction of ground truth sentences that are covered.
-        """
+        
         gt_sentences = _split_sentences(ground_truth)
         if not gt_sentences or not contexts:
             return 0.0
