@@ -107,7 +107,7 @@ query — confirms every query returns at least one meaningfully relevant chunk.
 **5. Evaluation Results**
 Loaded scores from `artifacts/evaluation_results.json` and plotted as a bar
 chart. All 4 metrics are in the High confidence zone (above 0.75), with
-Context Precision hitting 1.0 — every retrieved chunk was relevant to the
+Context Precision hitting 1.0 - every retrieved chunk was relevant to the
 question being asked.
 
 ---
@@ -143,3 +143,4 @@ Open `http://localhost:8000` in your browser.
 docker build -t papermind .
 docker run -p 8000:8000 --env-file .env papermind -->
 ```
+
