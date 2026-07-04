@@ -1,0 +1,30 @@
+{
+  "single_fact": {
+    "vector": {
+      "faithfulness": 0.8898,
+      "context_precision": 1.0,
+      "zero_result_rate": 0.0,
+      "num_questions": 25
+    },
+    "graph": {
+      "faithfulness": 0.335,
+      "context_precision": 0.152,
+      "zero_result_rate": 0.56,
+      "num_questions": 25
+    }
+  },
+  "multi_hop": {
+    "vector": {
+      "faithfulness": 0.7012,
+      "context_precision": 1.0,
+      "zero_result_rate": 0.0,
+      "num_questions": 8
+    },
+    "graph": {
+      "faithfulness": 0.3979,
+      "context_precision": 0.325,
+      "zero_result_rate": 0.375,
+      "num_questions": 8
+    }
+  }
+}

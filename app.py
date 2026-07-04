@@ -1,3 +1,21 @@
+"""
+app.py
+FastAPI application for PaperMind.
+
+Endpoints:
+  POST /ingest/pdf          — Upload and process a PDF
+  POST /ingest/image        — Upload and process an image via Claude Vision
+  POST /query                — Ask a question
+  POST /query/stream         — Streaming version of /query
+  POST /query/selection       — Ask about selected text from PDF viewer
+  GET  /documents             — List all ingested documents
+  DELETE /documents/{name}    — Remove a document
+  GET  /health                — Health check
+  GET  /evaluate               — Run evaluation
+  GET  /metrics                — Prometheus metrics (latency, requests, errors)
+  GET  /docs                   — Auto-generated Swagger UI
+"""
+
 import os
 import shutil
 from pathlib import Path
@@ -9,6 +27,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 from pydantic import BaseModel
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.logger import get_logger
 from src.pipeline.index_pipeline import IndexPipeline
@@ -30,6 +49,10 @@ templates = Jinja2Templates(directory="templates")
 
 index_pipeline = IndexPipeline()
 query_pipeline = QueryPipeline()
+
+# Exposes /metrics with request count, latency histograms, and error rates.
+# Prometheus scrapes this endpoint on an interval; Grafana queries Prometheus.
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 
 class QueryRequest(BaseModel):

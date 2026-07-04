@@ -1,0 +1,42 @@
+[
+  {
+    "question": "How does Volkswagen's relationship with Porsche SE affect its financial structure?",
+    "ground_truth": "Volkswagen and Porsche SE entered into a comprehensive agreement involving multiple contracts. Porsche SE holds a significant stake in Volkswagen, and this relationship is reflected in Volkswagen's consolidated financial reporting, including assets held for sale related to both Volkswagen Financial Services and Porsche.",
+    "type": "multi_hop"
+  },
+  {
+    "question": "How are the Board of Management of AUDI AG connected to legal proceedings involving the diesel emissions issue?",
+    "ground_truth": "Members of the Board of Management of AUDI AG have been named in legal proceedings related to fraud allegations connected to the diesel emissions issue involving 3.0 litre and 4.2 litre engines.",
+    "type": "multi_hop"
+  },
+  {
+    "question": "How does the data minimisation principle in GDPR Article 5 relate to the lawful bases for processing in Article 6?",
+    "ground_truth": "Article 5 establishes data minimisation as a core principle requiring data to be limited to what is necessary. Article 6 provides the lawful bases that justify why data is being processed in the first place, and any processing under these lawful bases must still comply with the data minimisation principle from Article 5.",
+    "type": "multi_hop"
+  },
+  {
+    "question": "How does the Data Protection Officer's role connect to the data protection impact assessment requirement?",
+    "ground_truth": "The Data Protection Officer is responsible for providing advice on data protection impact assessments under Article 39. The impact assessment itself is required under Article 35 when processing is likely to result in high risk, and the DPO's advisory role connects these two GDPR provisions.",
+    "type": "multi_hop"
+  },
+  {
+    "question": "How do Bosch's quality requirements for suppliers connect to its logistics and packaging standards?",
+    "ground_truth": "Bosch requires suppliers to maintain a quality management system with zero defect delivery, and this quality standard extends into logistics requirements including on-time delivery and standardized packaging that protects parts during transport, since packaging failures would compromise the zero defect quality goal.",
+    "type": "multi_hop"
+  },
+  {
+    "question": "How does Volkswagen's electric vehicle strategy connect to its 2023 financial performance?",
+    "ground_truth": "Volkswagen's battery electric vehicle deliveries increased by 35% to 771,000 units in 2023, contributing to the Group's overall delivery growth of 11.8% and its sales revenue increase of 15.5% to 322.3 billion euros, showing the EV strategy is reflected in the company's financial results.",
+    "type": "multi_hop"
+  },
+  {
+    "question": "How does GDPR's territorial scope under Article 3 relate to the cross-border data transfer rules in Article 44?",
+    "ground_truth": "Article 3 establishes that GDPR applies to processing related to EU data subjects even by controllers outside the EU. Article 44 then governs how that same data can legally be transferred to third countries, meaning a controller caught by Article 3's scope must also comply with Article 44 when moving data outside the EU.",
+    "type": "multi_hop"
+  },
+  {
+    "question": "How does Volkswagen's Western Europe delivery recovery in 2023 relate to the prior year's semiconductor shortage?",
+    "ground_truth": "Western Europe deliveries grew 20.1% in 2023 to 3,141,434 vehicles. This growth was a direct recovery from the prior year, when deliveries had been suppressed by limited vehicle availability caused by the semiconductor shortage and the Russia-Ukraine conflict.",
+    "type": "multi_hop"
+  }
+]
