@@ -33,6 +33,8 @@ came from.
 | Frontend | HTML + PDF.js |
 | Evaluation | Custom embedding-based pipeline |
 | Deployment | Docker |
+| Graph Retrieval | spaCy (NER) + NetworkX (knowledge graph) |
+| Monitoring      | Prometheus + Grafana                     |
 
 ---
 
@@ -112,6 +114,56 @@ question being asked.
 
 ---
 
+## GraphRAG Extension
+
+Extended PaperMind with a graph-based retrieval layer benchmarked
+against vector retrieval using the same evaluation pipeline.
+
+**Approach:** spaCy NER extracts named entities from every ingested
+chunk. Entity pairs co-occurring in the same sentence are connected
+as edges in a NetworkX knowledge graph. At query time, entities are
+extracted from the question and the graph is traversed 2 hops to
+retrieve connected chunks. The graph updates incrementally on every
+new document ingested — no full rebuild needed.
+
+**Benchmark — vector vs graph retrieval (25 single-fact + 8 multi-hop QA pairs):**
+
+| Question Type | Method | Faithfulness | Context Precision |
+|---|---|---|---|
+| Single-fact | Vector | 0.7332 | 1.0000 |
+| Single-fact | Graph  | 0.4667 | 0.2240 |
+| Multi-hop   | Vector | 0.7456 | 1.0000 |
+| Multi-hop   | Graph  | 0.6619 | 0.2500 |
+
+**Finding:** Vector retrieval outperformed graph retrieval on both
+metrics across both question types. Graph retrieval's coverage
+collapsed on 44% of single-fact queries due to entity-matching
+brittleness — legal and financial documents reference the same
+concept inconsistently across sentences, which breaks naive
+co-occurrence graphs. Entity resolution was identified as the key
+bottleneck. This is a correctly scoped negative result: dense
+embedding retrieval is the stronger default for this document corpus.
+
+---
+
+## Monitoring
+
+PaperMind exposes a `/metrics` endpoint instrumented with
+`prometheus-fastapi-instrumentator`. Prometheus scrapes every 5
+seconds; Grafana visualizes in real time.
+
+**Dashboard panels:** request latency (p95) · requests per minute ·
+error rate · service uptime
+
+```bash
+docker compose -f docker-compose.monitoring.yml up -d
+```
+
+Open Grafana at `http://localhost:3000` (admin / admin),
+add Prometheus data source at `http://prometheus:9090`.
+
+---
+
 ## Setup
 
 **1. Clone and create environment**
@@ -134,6 +186,24 @@ uvicorn app:app --reload
 ```
 
 Open `http://localhost:8000` in your browser.
+
+---
+
+<!-- ## API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/ingest/pdf` | Upload and process a PDF |
+| POST | `/ingest/image` | Upload and process an image via Claude Vision |
+| POST | `/query` | Ask a question |
+| POST | `/query/stream` | Streaming version of /query |
+| POST | `/query/selection` | Ask about text selected in the PDF viewer |
+| GET | `/documents` | List all ingested documents |
+| DELETE | `/documents/{name}` | Remove a document |
+| GET | `/health` | Health check |
+| GET | `/evaluate` | Run evaluation |
+| GET | `/metrics` | Prometheus metrics endpoint |
+| GET | `/docs` | Auto-generated Swagger UI | -->
 
 <!-- ---
 
