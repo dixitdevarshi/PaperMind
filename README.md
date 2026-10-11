@@ -20,6 +20,49 @@ came from.
 
 ---
 
+## System Architecture
+
+```mermaid
+flowchart TD
+    A["User uploads PDF / image / screenshot"] --> B["FastAPI Backend"]
+
+    B --> C{"Input type"}
+
+    C -->|PDF| D["PyMuPDF<br/>Text extraction"]
+    C -->|Image / Screenshot| E["Claude Haiku Vision<br/>Text / content extraction"]
+
+    D --> F["LangChain Text Splitting<br/>500 chars + 100 overlap"]
+    E --> F
+
+    F --> G["Multilingual MiniLM<br/>384-dim embeddings"]
+    G --> H[("ChromaDB<br/>Persistent Vector Store")]
+
+    I["User asks a question"] --> B
+    B --> J["Conversation Context<br/>+ Query Processing"]
+
+    J --> K["Query Embedding"]
+    K --> L["Similarity Search"]
+
+    H --> L
+
+    L --> M["Relevant Chunks<br/>+ Document + Page Metadata"]
+    M --> N["Claude Sonnet<br/>Grounded Answer Generation"]
+
+    N --> O["Answer + Sources"]
+    O --> P["HTML + PDF.js Frontend"]
+
+    B --> Q["/metrics"]
+    Q --> R["Prometheus"]
+    R --> S["Grafana"]
+```
+
+The system has two main flows:
+
+1. **Ingestion:** documents are extracted, split into chunks, embedded, and stored in ChromaDB.
+2. **Question answering:** the user question is embedded, relevant chunks are retrieved, and Claude generates an answer using only that retrieved context.
+
+Source metadata is preserved during ingestion so the final answer can point back to the original document and page.
+
 ## Tech Stack
 
 | Layer | Tool |
